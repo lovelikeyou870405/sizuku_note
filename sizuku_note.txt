@@ -530,4 +530,413 @@ $obj = new Employee('Hsuan');	//建立物件(會自動執行建構函式)
 $obj = NULL;	//釋放物件(會自動執行解構函式)
 ?>
 
+==:兩個物件隸屬於同一個類別，且有相同的屬性、值的時候，會回傳TRUE。
+===:兩個物件是相同類別的相同物件時，會回傳TRUE。
+ex.
+<?php
+class Employee
+{
+    public $Name;
+    function __construct($str)
+    {
+        $this->Name = $str;
+    }
+}
+$obj1 = new Employee('name');
+$obj2 = new Employee('name');
+$obj3 = $obj1;
+if($obj2==$obj1)    //true,$obj2和$obj1的成員、值相同
+if($obj2===$obj1)   //false,$obj2和$obj1指向不同物件
+if($obj3===$obj1)   //true,$obj3和$obj1指向相同物件
+?>
+
+[匿名類別(anonymous class)]
+ex.
+<?php
+$obj = new class('name')
+{
+    public $Name;
+    function __construct($str)
+    {
+        $this->Name = $str;
+    }
+}
+?>
+
+[繼承(inheritance)]
+從既有的類別(父類別)建立新的類別(子類別)。
+父類別、基底類別(base class、parent class、superclass)
+子類別、衍生類別、擴充類別(child class、subclass、derived class、extended class)
+子類別會繼承父類別的非私有成員，還可以加入新的成員或覆蓋父類別的方法。
+一個父類別可以被多的子類別所繼承。
+
+語法:
+class childclass_name extends parentclass_name
+{
+    //...;
+}
+
+存取層級:
+public、var:可以被任何程式碼存取，包括被繼承。
+private:只能被包含其定義的類別存取，不能被繼承。
+protected:只能被包含其定義的類別或子類別存取，包括被繼承。
+
+private的成員只能被父類別內的程式碼存取，安全性較高。
+
+[覆蓋(override)]
+子類別將繼承自父類別的方法重新定義。
+如果要在子類別呼叫父類別的方法，可以用parent::method_name()呼叫，parent代表目前所在的父類別。
+如果在父類別有不想讓子類別覆蓋的方法，可以在方法前面加上final來禁止子類別覆蓋父類別的方法。
+ex.
+final public function payment(){}   //這樣子類別就無法覆蓋payment();
+
+[抽象方法(abstract method)]
+必須放在抽象類別(abstract class)內，只有定義的部分，沒有實作的部分。實作的部分必須由子類別提供。抽象類別只能被繼承，不能被實體化(instantiation)。
+ex.
+<?php
+abstract class Payroll
+{
+    public $Name;
+    abstract public function Payment($Hours, $PayPate);  //定義抽象方法
+}
+class BonusPayroll extends Payroll
+{
+    public function Payment($Hours, $PayRate)
+    {
+        //覆蓋抽象方法(參數個數必須相同)
+        return $Hours * $PayRate +5000;
+    }
+}
+$obj = new BonusPayroll();
+echo $obj->Payment(100,80);
+?>
+
+子類別會繼承父類別的建構函式與解構函式，若子類別沒有定義自己的建構函式與解構函式，就會分別自動執行父類別的建構函式與解構函式。
+
+[命名空間(namespace)]
+用來組織個個類別、函式、常數等，就像檔案系統中目錄與檔案的關係一樣。
+ex. MyClass隸屬於 \A\B\C 命名空間，若要建立一個obj隸屬於MyClass物件:
+$obj = new \A\B\C\MyClass;
+第一個反斜線\表示全域空間(global space)，就像檔案系統中的跟目錄一樣。
+namespace必須放在檔案的最前端，而且檔案必須存為UTF-8編碼。
+ex.
+<?php
+namespace my\name;  //在全域空間內定義my\name命名空間
+class MyClass{}     //在\my\name命名空間內定義MyClass類別
+function Myfunction(){} 在\my\name命名空間內定義Myfunction()函式
+const myConst = 1;  //在\my\name命名空間內定義常數myConst
+$x = new \my\name\MyClass;  //建立類別
+$y = \my\name\myConst;      //取常數值
+?>
+
+簡寫可以用use 命名空間 as 簡寫。
+ex.
+namespace my\name;
+use my\name as A;
+//使用別名A取代my\name命名空間
+
+若要匯入命名空間類別、函式或常數，可使用:
+use my\name\{ClassA, ClassB, ClassC as C};  //匯入類別
+use function my\name\{funA, funB, funC};    //匯入函式
+use const my\name\{constA, constB, constC}; //匯入常數
+
+<在網頁之間傳遞資訊>
+
+<form>元素常用屬性:
+accept="..." :設定MIME類型(超過一個的話，中間以逗號隔開)，作為Web伺服器處理表單資料的根據。
+ex. accept="image/gif, image/jpeg"
+
+action="url" :設定表單處理程式的相對或絕對位址，若要傳送到email，可以設定email的url。
+ex. <form method="post" action="handler.php"></form>
+ex. <form method="post" action="mailto:test@gmail.com"></form>
+
+enctype="..." :設定將表單資料傳回Web伺服器所採取的編碼方式，預設值為"application/x-www-form-urlencoded"，若允許上傳檔案給Web伺服器，則設定為"multipart/form-data"，若要將表單資料傳送到電子郵件，則設定為"text/plain"。
+
+method="{get, post}" :設定表單資料傳送給表單處理程式的方法，
+method="get"時，表單資料會被存放在HTTP GET變數($_GET)，表單資料會附加在網址後面進行傳送，適合用來傳送少量、不要求安全的資料，例如搜尋關鍵字。
+method="post"時，表單資料會被存放在HTTP POST變數($_POST)，表單資料會透過HTTP標頭進行傳送，適合用來傳送大量或要求安全性的資料，例如上傳檔案、密碼。而且post會將瀏覽者輸入的密碼加以編碼。
+
+[HTTP Header]
+HTTP Header = Request Header + Response Header
+Request Header(要求標頭) :當瀏覽器向Web伺服器送出要求時，會將欲開啟之網頁的網址、自己的瀏覽器類型、版本等資訊一併傳送過去。
+Response Header(回應標頭) :當Web伺服器回應瀏覽器的要求時，會將欲開啟的網頁、該網頁的檔案大小、日期等資訊傳送給瀏覽器。
+
+[Cookie]
+瀏覽者造訪某些網站時，Web伺服器在用戶端寫入的一些小檔案，Cookie是儲存在用戶端的記憶體或磁碟。
+Cookie儲存在用戶端的記憶體或磁碟，不會佔用伺服器資源。
+
+setcookie(name[, value, int expire, path, str domain, bool secure]) :PHP內建的函式，作用為寫入cookie。其中:name為cookie的名稱，只有這個參數不能省略。value:值，若填入""則表示刪除cookie。expire:生命週期(生命週期內沒有設定這個參數，那麼cookie是存放在用戶端的記憶體，當瀏覽器終止執行時，cookie就會消失而不會寫入用戶端的磁碟)，單位為秒，用time()+幾秒。ex. time()+60*60*24 (一天)。path:cookie在用戶端的存放路徑。domain:設定能夠存取cookie的網域。secure:設定是否經由安全連線(SSL、HTTPS)。建構函式有無參數皆可，沒有回傳值。
+*使用setcookie()存入的值(value)會被加以編碼，若不要將值編碼，則可使用setrawcookie()。
+*寫入相同名稱的cookie時，後面的會覆蓋前面的值。
+*寫入cookie的動作必須放在任何輸出的前面，否則會導致setcookie()失敗。解決方法:在輸出前面呼叫ob_start()，就可以將輸出先放進緩衝區，等寫入cookie完成後，再呼叫ob_end_flash()，取出緩衝區的輸出。
+
+$_COOKIE["cookieName"] :透過變數 $_COOKIE 讀取cookie。
+
+[Session]
+將瀏覽器資料存放在伺服器端的記憶體，相當於伺服器端的cookie。不過為了減輕伺服器端的負擔，一般還是建議以cookie取代session。
+Session ID(SID) :瀏覽器存取網頁時被指派的一個唯一的識別字。
+Session 變數 :這是Session所記錄的變數，存放在伺服器端的特殊檔案，而且是一個Session ID有一個檔案。
+
+我們可以透過 $_SESSION 存取Session所記錄的變數。
+
+session_start() :啟用session功能。任何要存取session的網頁前面都要呼叫。
+session_id() :取得目前瀏覽器的session ID。
+
+*只要瀏覽器沒有關閉，session紀錄的變數就會被保留下來。即使開啟其他網頁，之後回到這個網頁，變數值仍不會消失。
+
+session_unset() :釋放所有session變數。
+session_destroy() :清除所以session變數的值。
+session_name([str name]) :若設定name則表示以name取代目前的session名稱。若沒填入參數，則表示回傳目前session的名稱。
+session_regenerate_id() :重新產生一個session ID。
+session_encode() :將目前的session內容加以編碼，然後傳回編碼後的字串。
+session_decode(str data) :將data加以解碼，還原成目前的session內容。
+session_save_path([str path]) :設定session存放路徑。
+session_write_close()、session_commit() :儲存session資料並終止session，通常在程式結束時，session資料都會被儲存，無須另外呼叫這個函式。
+
+session_set_cookie_params(int lifetime[, str path, str domain, bool secure]) :必須放在session_start()前面，用來設定php.ini組態設定檔內的session.cookie_lifetime(設定session cookie的生命週期，預設為0，表示持續到瀏覽器關閉，若變更為其他數字，則表示秒數)、session.cookie_paht(設定路徑)、session.cookie_domain(設定有效網域)、session.cookie_secure(設定是否經由安全連線)。
+
+session_get_cookie_params() :傳回php.ini組態設定檔內的參數值。
+
+<Ajax(Asynchronous JavaScript And XML)>
+使用非同步技術，讓網頁更新得更滑順。
+無須將整個網頁內容傳回伺服器，能夠節省網路頻寬。
+由於只回傳部分資料，能夠減輕伺服器的負荷。
+不會有像傳統動態網頁產生短暫空白或閃動的情況。
+
+[建立XML HttpRequest物件]
+使用JavaScript建立XMLHttpRequest物件
+IE5瀏覽器:
+var XHR = new ActiveXObject("Microsoft.XMLHTTP");
+IE6+瀏覽器:
+var XHR = new ActiveXObject("Msxmal2.XMLHTTP");
+其他非IE瀏覽器:
+var XHR = new XMLHttpRequest();
+由於無法事先得知瀏覽器的種類，所以可以如下撰寫:
+ex.
+function createXMLHttpRequest()
+{
+	try	//其他非IE瀏覽器
+	{
+		var XHR = new XMLHttpRequest();
+	}
+	catch(e1)	//捕捉到錯誤，表示不是非IE瀏覽器
+	{
+		try	//IE6+瀏覽器
+		{
+			var XHR = new ActiveXObject("Msxmal2.XMLHTTP");
+		}
+		catch(e2)	//捕捉到錯誤，表示不是IE6+瀏覽器
+		{
+			try	//IE5瀏覽器
+			{
+				var XHR = new ActiveXObject("Microsoft.XMLHTTP");
+			}
+			catch(e3)	//捕捉到錯誤，表示不支援Ajax
+			{
+				var XHR = false;
+			}
+		}
+	}
+	return XHR;
+}
+這樣往後網頁需要建立XMLHttpRequest物件，就將此js檔include進來，然後呼叫createXMLHttpRequest()即可:
+var XHR = createXMLHttpRequest();
+
+[傳送Http Request]
+XHR.open(str method, str URL, bool async) :設定要向伺服器要求甚麼資源，method設定建立Http連線的方式(GET、POST、HEAD)，URL為欲要求的檔案位址，async用來設定是否使用非同步呼叫，預設值為true。
+
+在伺服器收到資料，進行處理並回傳結果後，XMLHttpRequest物件的readyState屬性會變更，觸發onreadystatechange事件，可以透過onreadystatechange接收Http Response。
+
+XHR.send(str content) :送出Http Request，content是欲傳送給伺服器的參數，以GET傳送時，content為null；以POST傳送時，則可設定要傳送的參數。
+
+[接收Http Response並更新網頁內容]
+接收Http Response的程式碼是寫在onreadystatechange事件處理程序。
+readyState屬性會記錄目前處於階段，回傳值為0-4，4表示執行完畢。但不代表執行成功，需靠status屬性，200為成功，404為資源不存在。
+abort() :停止Http Request。
+getAllResponseHeaders() :取得所有回應標頭資訊。
+getResponseHeader(str name) :取得name所指定的回應標頭資訊。
+
+<SQL>
+[select指令(選取資料)]
+SELECT 欄位名稱 FROM 資料表名稱 [WHEERE 搜尋子句] [ORDER BY 排序子句{ASC|DESC}]
+ex. 從grade資料表選取所有紀錄的name和english兩個欄位，並更名為"姓名"和"英文"
+SELECT name AS 姓名, english AS 英文 FROM grade
+*AS :命名
+ex. 從grade資料表選取所有紀錄的name欄位，將chinese、math、english三個欄位相加後的分數產生新的total欄位
+SELECT name, chinese+math+english AS total FROM grade
+
+ex. 從grade選取所有紀錄的name、math，並math分數大於90
+SELECT name, math FROM grade WHERE math > 90
+*WHERE可以包含任何邏輯運算，只要回傳值為TRUE或FALSE即可:
+	= 等於
+	< 小於、 <= 小於等於
+	> 大於、 >= 大於等於
+	!=、<> 不等於
+	AND 運算元均為TRUE
+	OR 任一個運算元為TRUE即可
+	NOT 運算元為TRUE就回傳FALSE，為，為FALSE就回傳TRUE
+ex. 從grade篩選chinese大於90或math大於90紀錄的name、chinese、math
+SELECT name, chinese, math FROM grade WHERE chinese>90 OR math>90
+
+*LIKE運算子(接受萬用字元、前後要加上單引號):
+	% 任何長度的字串(包括0)
+	_ 任何一個字元
+	[] 某個範圍內的一個字元
+ex. 從grade篩選name是以"陳"開頭紀錄的所有欄位
+SELECT * FROM grade WHERE name LIKE '陳%'
+ex. 從grade篩選name是"X小美"紀錄的name、english、math，X代表任一字元
+SELECT name, english, math FROM grade WHERE name LIKE '_小美'
+ex. 從grade篩選name以a、b、c、d、e、f字母為首，後面ean紀錄的所有欄位
+SELECT * FROM grade WHERE name LIKE '[a-f]ean'
+
+*IN判斷欄位資料的範圍
+ex. 篩選chinese為80、85或88紀錄的所有欄位
+SELECT * FROM grade WHERE chinese IN (80,85,88)
+ex. 名字為陳小心、林小佩、孫小美紀錄的所有欄位
+SELECT * FROM grade WHERE name IN ('陳小心','林小佩','孫小美')
+
+*BETWEEN限制篩選範圍
+ex. 篩選math在80~90之間(包含80、90)紀錄的所有欄位
+SELECT * FROM grade WHERE math BETWEEN 80 AND 90
+
+*ORDER BY(排序)預設為遞增(ASC)，遞減為DESC
+ex. 先以國文遞減，再依數學遞減
+SELECT * FROM grade ORDER BY chinese DESC, math DESC
+
+*LIMIT 設定最多回傳筆數
+ex. 按照chinese遞減並只看5筆
+SELECT * FROM grade ORDER BY chinese DESC LIMIT 5
+ex. 按照chinese遞減並從第4筆開始，只看5筆
+SELECT * FROM grade ORDER BY chinese DESC LIMIT 3,5
+
+[INSERT指令(新增紀錄)]
+INSERT INTO 資料表名稱(欄位1,欄位2...) VALUES (資料1,資料2...)
+ex. 在grade新增一筆新紀錄，欄位內容為no:A8608011、name:小丸子、chinese:88、math:95、english:92
+INSERT INTO grade(no, name, chinese, math, english) VALUES('A8608011','小丸子',88,95,92)
+
+[UPDATE指令(更新紀錄)]
+UPDATE 資料表名稱 SET 欄位1=資料1, 欄位2=資料2... WHERE 條件
+ex. 在grade中學號為'A8608011'的name更新為'張小毛'
+UPDATE grade SET name='張小毛' WHERE no='A8608011'
+
+[DELETE指令(刪除紀錄)]
+DELETE FROM 資料表名稱 WHERE 條件
+ex. 刪除grade中english低於85且math低於85的紀錄
+DELETE FROM grade WHERE english < 85 AND math < 85
+
+<PHP 與 MySQL>
+[建立資料連結]
+在使用PHP存取MySQL之前，必須建立資料連結。
+mysqli_connect([str host, str username, str password, str dbname]) :
+host為伺服器的電腦名稱、DNS名稱或IP位址，若省略預設值為localhost:3306。
+username為登入MySQL資料庫伺服器的帳號。
+password為登入MySQL資料庫伺服器的密碼。
+dbname為預設的資料庫名稱。
+*在使用mysqli_connect()發生錯誤時，會出現額外的錯誤訊息，若不要在網頁上顯示這些錯誤訊息，可以在mysqli_connect()的前面加上運算子@(忽略錯誤)。
+
+die("content") :終止程式並顯示content文字。
+
+[關閉資料連結]
+mysqli_close($link)
+
+[存取MySQL資料庫伺服器]
+mysqli_get_client_info() :取得MySQL用戶端版本資訊。
+mysqli_get_host_info($link) :取得主機的相關資訊，$link是經由TCP/IP通訊協定連接至localhost伺服器。
+mysqli_get_proto_info($link) :取得資料庫協定的版本資訊。
+mysqli_get_server_info($link) :取得資料庫伺服器的版本資訊。
+
+mysqli_connect_errno() :傳回最近一次呼叫mysqli_connect()所產生的錯誤代碼。
+mysqli_connect_error() :傳回最近一次呼叫mysqli_connect()所產生的錯誤訊息。
+mysqli_errno($link) :傳回最近一次存取MySQL資料庫所產生的錯誤代碼。
+mysqli_error($link) :傳回最近一次存取MySQL資料庫所產生的錯誤訊息。
+
+[執行SQL查詢]
+mysqli_select_db($link, str dbname) :開啟資料庫，dbname為欲開啟的資料庫名稱。
+mysqli_query($link, str query) :執行SQL語法查詢，query為欲執行的SQL語法。其執行結果為:
+失敗:一律回傳false。
+成功:回傳true，當執行SELECT、SHOW、EXPLAIN或DESCRIBE時，會回傳資源識別字(mysqli_result 物件)，類似位於記憶體內的資料庫。
+ex.
+mysqli_query($link, "SET NAMES utf8");
+*設定編碼為utf8才不會出現亂碼。
+
+mysqli_num_rows(result) :適用於SELECT，可以傳回選取的紀錄筆數。
+mysqli_num_fields(result) :適用於SELECT，可以傳回選取的欄位數目。
+mysqli_affected_rows(result) :適用於INSERT、UPDATE、REPLACE、DELETE等，可以傳回有多少筆紀錄受到該指令的影響。
+*若使用於DELETE時沒有給予WHERE條件的話，mysqli_affected_rows()回傳為0，表示紀錄全部被刪除，而不是實際刪除的筆數。
+*若最近一次執行SQL查詢結果為失敗，mysqli_affected_rows()會回傳-1。
+*若執行UPDATE時，mysqli_affected_rows()回傳的是實際更新的紀錄筆數，而不是WHERE的紀錄筆數，因為當指定的新值和舊值相同時，並不會有更新的動作。
+
+[取得欄位資訊]
+mysqli_fetch_field_direct($result, int field_offset) :取得欄位資訊，field_offset為欄位的序號，0表示第一個欄位，依此類推。其回傳值為object型別，常用的屬性有:
+name:欄位名稱。
+orgname:欄位原始名稱。
+table:欄位所屬資料表名稱。
+orgtable:欄位所屬資料表原始名稱。
+db:欄位所屬資料庫名稱。
+max_length:欄位實際存放的最大長度，不是資料庫內設定的資料長度。
+length:欄位在資料庫內設定的資料長度。
+type:欄位型態，3代表integer、10代表date、253代表varchar。
+mysqli_fetch_field($result) :取得欄位名稱、資料行帶、最大長度。
+mysqli_fetch_row($result) :用來讀取一筆紀錄。
+mysqli_free_result($result) :釋放記憶體。
+mysqli_fetch_array($result[, int type]) :用來讀取紀錄並存放在陣列，然後將記錄指標移到下一筆，若讀不到紀錄就回傳FALSE。type有MYSQLI_NUM(表示只能用欄位序號取得欄位內容)、MYSQLI_ASSOC(表示只能用欄位名稱取得欄位內容)、MYSQLI_BOTH(表示可以使用欄位序號或欄位名稱取得欄位內容)。
+mysqli_fetch_assoc($result) :用來讀取紀錄內容並存放在陣列，然後將記錄指標移到下一筆。
+mysqli_fetch_object($result) :讀取紀錄內容，然後將紀錄指標移到下一筆。
+mysqli_data_seek($result, int num) :用來移動紀錄指標，num為記錄序號，0表示第一筆，1表示第二筆...。
+
+<檔案上傳>
+組態設定檔(預設路徑: C:\AppServ\php7\php.ini)
+file_uploads :設定是否允許經由HTTP進行檔案上傳。
+upload_tmp_dir :設定檔案上傳時所要使用的暫存資料夾(預設路徑: C:\Windows\Temp)。
+upload_mas_filesize :設定允許上船的允許上傳的檔案大小(預設2MB)。
+post_max_size :設定使用POST傳送回伺服器時，所允許傳送的最大容量(預設8MB)。
+max_input_time :設定使用POST傳送回伺服器時，所允許傳送的最長時間(預設60秒)。
+*php.ini 裡面的參數名稱前面若以分號(;)開頭，則表示被註解起來，要啟用的話，需要將分號刪除。
+
+
+[前端]
+表單的編碼方式必須設定為"multipart/form-data"
+<form metho="post" action="..." enctype="multipart/form-data"></form>
+
+<input type="file" name="...">
+
+若要插入多個檔案欄位，需要設定相同的name，並且值必須為陣列。
+<input type="file" name="myfile[]">
+
+可以在表單中插入一個隱藏欄位，名稱為MAX_FILE_SIZE，用來設定允許上傳的檔案大小(單位為位元組)。
+<input type="hidden" name="MAX_FILE_SIZE" value="1048576">
+*1048576=1MB=1024*1024
+
+[後端]
+取得上傳檔案的資訊:
+$_FILES["欄位名稱"]["name"] :取得檔案的名稱。
+$_FILES["欄位名稱"]["type"] :取得上傳檔案的MIME類型。
+$_FILES["欄位名稱"]["size"] :取得檔案大小，單位為位元組。
+$_FILES["欄位名稱"]["tmp_name"] :取得暫存路徑及檔案名稱。
+$_FILES["欄位名稱"]["error"] :取得錯誤代碼。0:成功。1:檔案大小超過php.ini所設定的大小。2:超過網頁MAX_FILE_SIZE隱藏欄位所設定的大小。3:檔案上傳不完整。4:找不到欲上傳檔案。
+*若是多個檔案，則後面需要加上[]:
+ex. $_FILES["欄位名稱"]["name"][0]
+
+移動檔案:
+move_uploaded_file(str filename, str destination) :將暫存檔案移至指定資料夾，filename為暫存檔案的路徑及名稱，可以透過$_FILES["欄位名稱"]["tmp_name"]取得，destination為目的檔案的路徑及檔案名稱。
+*當destination指定的目的檔案已存在，會覆蓋原來的檔案，而且當成是執行完畢時，無論有沒有搬移暫存檔，暫存檔都會被自動刪除。
+*在big5編碼作業系統裡會無法正確處理中文檔名，若上傳的檔案可能包含中文檔名，可使用iconv()將檔名由UTF-8轉成Big5編碼。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
