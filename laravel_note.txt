@@ -1,0 +1,151 @@
+[ 開發環境 ]
+    XAMPP :微軟整合網站伺服器 Apache、PHP、MySQL。
+    VScode :套件推薦 PHP Intelephense(Ben Mewburn製作的版本)，這個套件會對PHP語法智慧提示。
+    Compuser :可以在http://packagist.org/ 找到非常多PHP套件，應用在自己的專案上。
+    Postman :可以用來傳送請求的工具，用來測試我們製作的API功能是否正常。
+    Git :版本控制工具。
+    Laravel :
+        在cmd利用composer下載。
+            -指令: composer global require "laravel/installer"
+        建立laravel專案，名為filename。
+            -指令: laravel new filename
+        接著進入filename資料夾並查看laravel版本。
+            -指令: cd filename
+            -指令: php artisan -V
+            * artisan是Laravel打造的指令工具方便建立需要的檔案或執行Laravel的功能。
+        完成安裝Laravel後，進入專案資料夾，使用指令開啟網站伺服器。
+            -指令: php artisan serve
+        打開瀏覽器輸入 http://127.0.0.1:8000 即可看到畫面。
+
+    < port >
+    port，通訊埠，主要目的是分類，HTTP協定預設使用 80 port，只要是 80 port進來的人，我們都會把資料給網站伺服器 Apache 處理，程式預設會去監聽從 80 port 進來的所有任務，並給予對應的回應。
+
+    < HTTP 狀態碼 >
+    API設計上一定要返回對應的狀態碼給客戶端，大致上可分為:
+    200系列 :請求成功。
+    400系列 :表示請求資料有問題。
+    500系列 :表示伺服器出錯的問題。
+
+    < REST 風格( Representational State Transfer，表現層狀態轉移 ) >
+    依照這個思維打造的 API 稱為 RESTful API ，為了讓日後方便維護，原則 :
+        -定義一個可以被操作的資源物件(Object)。
+        -資源物件資料運用一組固定動作，簡稱 CRUD 。
+            創建 (Create)
+            讀取 (Read)
+            更新 (Update)
+            刪除 (Delete)
+        -可請求資源的網址(URI)。
+        -使用JSON、XML格式做資料傳遞。
+
+    < HTTP動詞對應動作 >
+        -GET :讀取、查詢資源資料。
+        -POST :新增資源資料。
+        -DELETE :刪除資源資料。
+        -PUT :替換資源資料。(舊資料刪除，寫入新的資料)
+        -PATCH :更新資源資料。(只替代部分內容)
+        *GET的動作比較安全，因為不會更改到資料庫的資料。
+
+    < Laravel環境變數設定 >
+    安裝完laravel後建立資料庫完成，開啟專案的 .env 設定環境變數:
+        DB_CONNECTION=mysql	#資料庫種類連線設定
+        DB_HOST=127.0.0.1	#資料庫軟體安裝在哪台主機ip
+        DB_PORT=3306		#port mysql預設3306
+        DB_DATABASE=animal	#專案連結的資料庫名稱
+        DB_USERNAME=webAdmin	#資料庫管理員帳號
+        DB_PASSWORD=1234	#資料庫管理員密碼
+
+    < git版控 >
+    進入專案，加入版控功能。
+        -指令: cd filename
+        -指令: git init
+    將所有資料全部加入git暫存區(暫存區表示預計加入版控儲存庫的檔案)。
+        -指令: git add .
+    設定版控提交者姓名、電子郵件。
+        -指令: git config --global user.name "姓名"
+        -指令: git config --global user.email "Emain"
+        *查詢可用 git config user.name 以及 git config user.email
+    將暫存區檔案提交到儲存庫，並附上簡單的摘要訊息。
+        -指令: git commit -m "摘要"
+        *查看儲存庫裡面的紀錄點可用 git log 。
+
+    < 新建資源檔案 >
+    每一個資源都會建立一個 Model ，MVC設計架構中其中一個要素，主要功能與資料庫溝通，可以把他理解成建立一個用來操作的資源。ex. 要操作會員，就會建立一個User的Model，Laravel將Model命名為 Eloquent ORM 。
+        -指令: php artisan make:model modelname -rmc
+        * -rmc 意思是在建立Model的同時也建立Migration及Controller，r的ˋ意思是載入CRUD方法。
+        *Migration預設位置 database\migrations\2020_12_10_042539_modelnames_table.php
+        *Controller預設位置 app\Http\Controllers\modelnameController.php
+        *Model預設位置 app\Models\modelname.php
+        *Controller會因為指令的r參數，所以裡面已經有很多方法。Migration檔案命名方式是以日期時間自動加上，執行Migration檔案會有順序性。
+    接著設定路由，打開 routes\api.php ，此檔案專門設計AIP網址。
+        在檔案中插入程式碼，並於檔案上方引用檔案:
+            use App\Http\Controllers\modelnameController;
+            Route::apiResource('modelnames', modelnameController::class);
+        *Route Facades的apiResource是Laravel內建方法，將路由網址設定為modelnames字串，對應到ModelController檔案內的對應方法。
+        存檔後可使用cmd查看路由。
+            -指令: php artisan route:list
+        
+    < MVC架構 >
+    Laravel是使用MVC架構設計的PHP框架，MVC是一種設計的技術指引。MVC架構主要分為 Model 、 Controller 、 View 三個部分。
+        Model :程式與資料庫溝通的中間人。
+        Controller :主要用於撰寫收到請求後應該要做甚麼邏輯處理的地方。
+        View :負責網頁看到的所有畫面。
+
+    < 實作 Migration >
+    up方法 :表示運行這個檔案的時候，會執行的方法。
+    down方法 :表示執行恢復資料庫流程時會執行的方法。
+
+    up() 說明:
+        使用 Schema Facade 的 create 方法。
+        ex.
+        public function up()
+        {
+            Schema::create('tableName', function(Blueprint $table){ });
+        }
+        第一個參數填入要建立的資料表名稱。
+        第二個參數是匿名函數，在其中撰寫要如何建立這張資料表的欄位。
+
+        設定欄位方法 及 說明:
+            id() :設定可以儲存較大的整數型態，新增一筆資料加一，並指儲存正整數，而且必須為資料表中的唯一值。
+            unsignedBigInteger :無符號的整數類型，只存正整數，可以存取比較大範圍的數字。
+            string :資料庫的 VARCHAT 類型。
+            date :日期類型。
+            boolean :布林類型。
+            text :資料庫的 TEXT 類型。
+            timestamps : TIMESTAMPS 時間戳記類型。
+
+        設定輔助欄位方法 及 說明:
+            nullable :允許欄位空值(null)。
+            default :設定欄位的預設值。
+
+        down() 說明:
+            ex.
+            public function down()
+            {
+                Schema::dropIfExits('tableName');
+            }
+            表示如果資料表存在的話刪除資料表。
+
+        完整範例:
+            public function up()
+            {
+                Schema::create('animals', function (Blueprint $table) {
+                    $table->id();   //此方法等於使用遞增整數設定一個ID欄位
+                    $table->unsignedBigInteger('type_id')->nullable();
+                    $table->string('name');
+                    $table->boolean('fix')->default(false);
+                    $table->text('description')->nullable();
+                    $table->text('personality')->nullable();
+                    $table->unsignedBigInteger('user_id');
+                    $table->timestamps();
+                });
+            }
+
+            public function down()
+            {
+                Schema::dropIfExists('animals');
+            }
+
+        寫完以後確認資料庫有啟動，可透過cmd運行 Migration :
+            -指令: php artisan migrate
+
+
